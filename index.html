@@ -747,6 +747,10 @@
 
         stage.appendChild(button);
       });
+
+      // MAPS se crea después de la primera sincronización; repetirla aquí
+      // para que la imagen de fondo del botón quede correctamente enfocada.
+      syncButtonImages();
     }
 
     slide.addEventListener("load", function() {
