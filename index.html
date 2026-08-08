@@ -244,7 +244,7 @@
       {
         "x": 50.2,
         "y": 35.0,
-        "w": 23.0,
+        "w": 23.2,
         "h": 12.8,
         "target": 8,
         "name": "Carta"
@@ -260,7 +260,7 @@
       {
         "x": 50.2,
         "y": 51.0,
-        "w": 22.0,
+        "w": 23.2,
         "h": 12.8,
         "target": 4,
         "name": "FAQ"
@@ -631,20 +631,36 @@
         button.style.backgroundPosition = posX + "px " + posY + "px";
       });
 
+      // Diapositiva 2: los cuatro botones deben tener exactamente el mismo
+      // tamaño y la imagen ampliada debe quedar centrada en el centro real
+      // de cada botón.
+      if (currentSlide === 2) {
+        document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
+          if (button.classList.contains("arrow-left") || button.classList.contains("arrow-right") || button.classList.contains("curved-arrow")) return;
+          const x = parseFloat(button.dataset.x) / 100 * sw;
+          const y = parseFloat(button.dataset.y) / 100 * sh;
+          const w = parseFloat(button.dataset.w) / 100 * sw;
+          const h = parseFloat(button.dataset.h) / 100 * sh;
+          const centerX = x + w / 2;
+          const centerY = y + h / 2;
+          const scaledW = sw * zoom;
+          const scaledH = sh * zoom;
+          button.style.backgroundSize = scaledW + "px " + scaledH + "px";
+          button.style.backgroundPosition =
+            (sw / 2 - centerX * zoom) + "px " +
+            (sh / 2 - centerY * zoom) + "px";
+        });
+      }
+
       document.querySelectorAll(".map-button[data-x]").forEach((button) => {
         const x = parseFloat(button.dataset.x) / 100 * sw;
         const y = parseFloat(button.dataset.y) / 100 * sh;
-        const sourceW = parseFloat(button.dataset.w) / 100 * sw;
-        const sourceH = parseFloat(button.dataset.h) / 100 * sh;
         const w = button.offsetWidth;
         const h = button.offsetHeight;
         const scaledW = sw * zoom;
         const scaledH = sh * zoom;
-        // Centra exactamente el mismo punto de la diapositiva dentro del botón.
-        const sourceCenterX = x + sourceW / 2;
-        const sourceCenterY = y + sourceH / 2;
-        const posX = w / 2 - sourceCenterX * zoom;
-        const posY = h / 2 - sourceCenterY * zoom;
+        const posX = -((x + w / 2) * zoom - w / 2);
+        const posY = -((y + h / 2) * zoom - h / 2);
         button.style.backgroundSize = scaledW + "px " + scaledH + "px";
         button.style.backgroundPosition = posX + "px " + posY + "px";
       });
@@ -734,8 +750,6 @@
         button.style.height = link.h + "%";
         button.dataset.x = link.x;
         button.dataset.y = link.y;
-        button.dataset.w = link.w;
-        button.dataset.h = link.h;
         button.style.backgroundImage = 'url("slides/' + currentSlide + '.png")';
         button.style.backgroundRepeat = "no-repeat";
 
@@ -747,10 +761,6 @@
 
         stage.appendChild(button);
       });
-
-      // MAPS se crea después de la primera sincronización; repetirla aquí
-      // para que la imagen de fondo del botón quede correctamente enfocada.
-      syncButtonImages();
     }
 
     slide.addEventListener("load", function() {
