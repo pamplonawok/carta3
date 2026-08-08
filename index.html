@@ -761,6 +761,11 @@
 
         stage.appendChild(button);
       });
+
+      // Recalcular la imagen de todos los botones después de crear también
+      // el botón de MAPS. Así el recorte de la diapositiva queda centrado
+      // dentro del botón y el efecto lupa enfoca el elemento correcto.
+      syncButtonImages();
     }
 
     slide.addEventListener("load", function() {
