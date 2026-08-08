@@ -616,7 +616,7 @@
     function syncButtonImages() {
       const sw = stage.clientWidth;
       const sh = stage.clientHeight;
-      const zoom = currentSlide === 2 ? 1.12 : 1.18;
+      const zoom = currentSlide === 2 ? 1.02 : 1.18;
       document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
         if (button.classList.contains("arrow-left") || button.classList.contains("arrow-right") || button.classList.contains("curved-arrow")) return;
         const x = parseFloat(button.dataset.x) / 100 * sw;
