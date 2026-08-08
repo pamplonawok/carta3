@@ -15,7 +15,7 @@
       background: #000;
     }
     body {
-      touch-action: manipulation;
+      touch-action: pan-y pinch-zoom;
       font-family: Arial, sans-serif;
     }
     #viewer {
@@ -151,10 +151,10 @@
       border:1px solid rgba(255,35,35,.75)!important;
       border-radius:10px!important;
       box-shadow:0 4px 0 #320000,0 7px 12px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.10),inset 0 -4px 7px rgba(0,0,0,.45)!important;
-      width:11.5%!important;
+      width:8.5%!important;
       height:auto!important;
       aspect-ratio:1 / 1!important;
-      top:39.7%!important;
+      top:40.45%!important;
       z-index:30;
     }
     .hotspot.arrow-left::before,.hotspot.arrow-right::before{
@@ -680,9 +680,9 @@
         // completamente el dibujo rojo que existe en el fondo.
         if (shape === "arrow-left" || shape === "arrow-right") {
           // Caja cuadrada negra que tapa completamente la flecha roja del fondo.
-          button.style.left = shape === "arrow-left" ? "7.45%" : "81.4%";
-          button.style.top = "39.7%";
-          button.style.width = "11.5%";
+          button.style.left = shape === "arrow-left" ? "8.95%" : "82.9%";
+          button.style.top = "40.45%";
+          button.style.width = "8.5%";
           button.style.height = "auto";
           button.style.aspectRatio = "1 / 1";
         }
@@ -786,25 +786,6 @@
     });
 
     // Deslizar también permite cambiar de página.
-    let startX = 0;
-    let startY = 0;
-
-    stage.addEventListener("touchstart", function(event) {
-      const touch = event.changedTouches[0];
-      startX = touch.clientX;
-      startY = touch.clientY;
-    }, { passive: true });
-
-    stage.addEventListener("touchend", function(event) {
-      const touch = event.changedTouches[0];
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-
-      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)) {
-        goTo(currentSlide + (dx < 0 ? 1 : -1));
-      }
-    }, { passive: true });
-
     currentSlide = readSlide();
     draw();
   
