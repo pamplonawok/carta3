@@ -139,153 +139,17 @@
     }
 
 
-    /* ===== CARTA 3.0 — BOTONES CON RELIEVE 3D ===== */
-    .hotspot{
-      -webkit-tap-highlight-color:transparent;
-      outline:none;
-      border:0;
-      padding:0;
-      margin:0;
-      background:transparent;
-      box-shadow:none;
-      transition:transform .12s ease, filter .12s ease;
-      isolation:isolate;
-    }
-
-    /* Relieve 3D permanente: respeta la silueta del botón y deja ver
-       completamente la imagen original que hay debajo. */
-    .hotspot::before{
-      content:"";
-      position:absolute;
-      inset:2%;
-      pointer-events:none;
-      opacity:.58;
-      border:1px solid rgba(255,255,255,.30);
-      border-radius:12px;
-      background:linear-gradient(135deg,
-        rgba(255,255,255,.13) 0%,
-        rgba(255,255,255,.035) 28%,
-        rgba(0,0,0,.015) 52%,
-        rgba(0,0,0,.20) 100%);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.24),
-        inset 2px 0 0 rgba(255,255,255,.10),
-        inset 0 -4px 6px rgba(0,0,0,.24),
-        inset -2px 0 4px rgba(0,0,0,.13),
-        0 3px 7px rgba(0,0,0,.22);
-      transition:opacity .12s ease, box-shadow .12s ease;
-    }
-
-    /* Círculos: el bisel sigue exactamente la forma circular. */
-    .hotspot.circle::before{
-      border-radius:50%;
-    }
-
-    /* Flechas de navegación: botones HTML limpios. */
-    .hotspot.arrow-left,
-    .hotspot.arrow-right,
-    .hotspot.curved-arrow{
-      overflow:visible;
-      background:linear-gradient(145deg,#2a2a2a,#090909);
-      border:2px solid #c40000;
-      border-radius:50%;
-      box-shadow:0 3px 0 #650000, 0 5px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.18);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#fff;
-      font-family:Arial,sans-serif;
-      font-weight:700;
-      font-size:clamp(22px,3.4vw,38px);
-      line-height:1;
-    }
-    .hotspot.arrow-left::before,
-    .hotspot.arrow-right::before,
-    .hotspot.curved-arrow::before{
-      content:none;
-    }
-    .hotspot.arrow-left::after{content:'←'; font-size:inherit; line-height:1;}
-    .hotspot.arrow-right::after{content:'→'; font-size:inherit; line-height:1;}
-    .hotspot.curved-arrow{
-      color:#f0c51a;
-      border-color:#d5ad10;
-      box-shadow:0 3px 0 #806400, 0 5px 10px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.20);
-    }
-    .hotspot.curved-arrow::after{content:'↶'; font-size:inherit; line-height:1;}
-
-    /* Maps: el botón conserva la imagen original y el relieve. */
-    .hotspot.map-button{
-      overflow:hidden;
-      border-radius:10px;
-      box-shadow:0 3px 0 rgba(90,0,0,.9), 0 4px 9px rgba(0,0,0,.35);
-    }
-
-    /* ===== FASE 3 — LA IMAGEN ORIGINAL FORMA PARTE DEL BOTÓN =====
-       El botón muestra su propio recorte de la diapositiva. Así el relieve
-       se aplica a la imagen del botón y no a una capa transparente encima. */
-    .hotspot{
-      overflow:hidden;
-      background-repeat:no-repeat;
-      background-color:transparent;
-      background-origin:border-box;
-    }
-
-    .hotspot.circle{
-      clip-path:circle(50% at 50% 50%);
-    }
-/* Al pulsar, el botón se hunde y el bisel cambia de dirección. */
-    .hotspot:active,
-    .hotspot.is-touching{
-      transform:translateY(2px) scale(.985);
-      filter:brightness(.96);
-    }
-
-    .hotspot:active::before,
-    .hotspot.is-touching::before{
-      opacity:.82;
-      box-shadow:
-        inset 0 4px 7px rgba(0,0,0,.28),
-        inset 0 -1px 0 rgba(255,255,255,.12),
-        0 1px 3px rgba(0,0,0,.16);
-    }
-
-    .hotspot:hover::before,
-    .hotspot:focus-visible::before{
-      opacity:.72;
-    }
-
-
-    /* Botones HTML definitivos para navegación: no muestran la imagen de fondo. */
-    .hotspot.arrow-left,
-    .hotspot.arrow-right{
-      background-image:none !important;
-      width:12.8% !important;
-      height:10% !important;
-      top:45% !important;
-      border-radius:14px;
-      border:2px solid #d00000;
-      background:linear-gradient(180deg,#3a0808,#9e0000 55%,#520000) !important;
-      color:#fff;
-      box-shadow:0 3px 0 #3b0000, 0 4px 9px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.22);
-    }
-    .hotspot.arrow-left::before,
-    .hotspot.arrow-right::before{
-      content:none !important;
-    }
-    .hotspot.curved-arrow{
-      background-image:none !important;
-      border-radius:12px;
-      background:linear-gradient(180deg,#4a3a00,#c9a800 55%,#756000) !important;
-    }
-    .hotspot.curved-arrow::before{
-      content:none !important;
-    }
-
-    @media (prefers-reduced-motion:reduce){
-      .hotspot{transition:none!important;}
-      .hotspot::before{transition:none!important;}
-    }
-
+        /* ===== CARTA 3.1 — BOTONES 3D + FLECHAS HTML ===== */
+    .hotspot{ -webkit-tap-highlight-color:transparent; outline:none; border:0; padding:0; margin:0; background-repeat:no-repeat; background-color:transparent; background-origin:border-box; box-shadow:none; transition:transform .12s ease,filter .12s ease; isolation:isolate; cursor:pointer; }
+    .hotspot::before{ content:""; position:absolute; inset:0; pointer-events:none; border:1px solid rgba(255,255,255,.34); border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.04) 28%,rgba(0,0,0,0) 52%,rgba(0,0,0,.24)); box-shadow:inset 0 2px 0 rgba(255,255,255,.24),inset 2px 0 0 rgba(255,255,255,.08),inset 0 -5px 7px rgba(0,0,0,.28),inset -2px 0 4px rgba(0,0,0,.15),0 3px 7px rgba(0,0,0,.28); }
+    .hotspot.circle{clip-path:circle(50% at 50% 50%);border-radius:50%;}.hotspot.circle::before{border-radius:50%;}
+    .hotspot.arrow-left,.hotspot.arrow-right{display:flex;align-items:center;justify-content:center;overflow:visible;background-image:none!important;background:linear-gradient(180deg,#e21b1b,#b40000 58%,#720000)!important;border:2px solid #ff5555;border-radius:14px;color:#fff;font-family:Arial,sans-serif;font-weight:900;font-size:clamp(30px,4vw,48px);line-height:1;text-shadow:0 2px 2px rgba(0,0,0,.5);box-shadow:0 4px 0 #4b0000,0 7px 12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.30),inset 0 -4px 6px rgba(0,0,0,.25);width:9%!important;height:9%!important;top:45.5%!important;}
+    .hotspot.arrow-left::before,.hotspot.arrow-right::before{content:none;}.hotspot.arrow-left::after{content:'‹';}.hotspot.arrow-right::after{content:'›';}
+    .hotspot.curved-arrow{display:flex;align-items:center;justify-content:center;overflow:visible;background-image:none!important;background:linear-gradient(180deg,#f1cb2e,#cda50a 58%,#8b6b00)!important;border:2px solid #ffe36a;border-radius:14px;color:#171200;font-family:Arial,sans-serif;font-weight:900;font-size:clamp(27px,3.8vw,45px);line-height:1;box-shadow:0 4px 0 #5a4500,0 7px 12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -4px 6px rgba(0,0,0,.22);}
+    .hotspot.curved-arrow::before{content:none;}.hotspot.curved-arrow::after{content:'↶';}
+    .hotspot.map-button{overflow:hidden;border-radius:11px;box-shadow:0 3px 0 rgba(65,0,0,.95),0 5px 10px rgba(0,0,0,.35);}.hotspot.map-button::before{border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.025) 35%,rgba(0,0,0,0) 54%,rgba(0,0,0,.18));}
+    .hotspot:active,.hotspot.is-touching{transform:translateY(2px) scale(.985);filter:brightness(.96);}.hotspot:active::before,.hotspot.is-touching::before{box-shadow:inset 0 4px 7px rgba(0,0,0,.30),inset 0 -1px 0 rgba(255,255,255,.12),0 1px 3px rgba(0,0,0,.16);}
+    @media (prefers-reduced-motion:reduce){.hotspot{transition:none!important;}}
 </style>
 </head>
 <body>
@@ -639,9 +503,9 @@
       "1": [
         {
           "x": 54.65,
-          "y": 86.95,
-          "w": 24.65,
-          "h": 10.35,
+          "y": 86.85,
+          "w": 24.60,
+          "h": 10.40,
           "url": "https://maps.app.goo.gl/sn9JC4gLSb1Sx7TDA",
           "name": "Google Maps"
         }
