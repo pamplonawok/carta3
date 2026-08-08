@@ -244,7 +244,7 @@
       {
         "x": 50.2,
         "y": 35.0,
-        "w": 23.2,
+        "w": 23.0,
         "h": 12.8,
         "target": 8,
         "name": "Carta"
@@ -260,7 +260,7 @@
       {
         "x": 50.2,
         "y": 51.0,
-        "w": 23.2,
+        "w": 22.0,
         "h": 12.8,
         "target": 4,
         "name": "FAQ"
@@ -616,7 +616,7 @@
     function syncButtonImages() {
       const sw = stage.clientWidth;
       const sh = stage.clientHeight;
-      const zoom = 1.18;
+      const zoom = currentSlide === 2 ? 1.12 : 1.18;
       document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
         if (button.classList.contains("arrow-left") || button.classList.contains("arrow-right") || button.classList.contains("curved-arrow")) return;
         const x = parseFloat(button.dataset.x) / 100 * sw;
@@ -631,36 +631,20 @@
         button.style.backgroundPosition = posX + "px " + posY + "px";
       });
 
-      // Diapositiva 2: los cuatro botones deben tener exactamente el mismo
-      // tamaño y la imagen ampliada debe quedar centrada en el centro real
-      // de cada botón.
-      if (currentSlide === 2) {
-        document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
-          if (button.classList.contains("arrow-left") || button.classList.contains("arrow-right") || button.classList.contains("curved-arrow")) return;
-          const x = parseFloat(button.dataset.x) / 100 * sw;
-          const y = parseFloat(button.dataset.y) / 100 * sh;
-          const w = parseFloat(button.dataset.w) / 100 * sw;
-          const h = parseFloat(button.dataset.h) / 100 * sh;
-          const centerX = x + w / 2;
-          const centerY = y + h / 2;
-          const scaledW = sw * zoom;
-          const scaledH = sh * zoom;
-          button.style.backgroundSize = scaledW + "px " + scaledH + "px";
-          button.style.backgroundPosition =
-            (sw / 2 - centerX * zoom) + "px " +
-            (sh / 2 - centerY * zoom) + "px";
-        });
-      }
-
       document.querySelectorAll(".map-button[data-x]").forEach((button) => {
         const x = parseFloat(button.dataset.x) / 100 * sw;
         const y = parseFloat(button.dataset.y) / 100 * sh;
+        const sourceW = parseFloat(button.dataset.w) / 100 * sw;
+        const sourceH = parseFloat(button.dataset.h) / 100 * sh;
         const w = button.offsetWidth;
         const h = button.offsetHeight;
         const scaledW = sw * zoom;
         const scaledH = sh * zoom;
-        const posX = -((x + w / 2) * zoom - w / 2);
-        const posY = -((y + h / 2) * zoom - h / 2);
+        // Centra exactamente el mismo punto de la diapositiva dentro del botón.
+        const sourceCenterX = x + sourceW / 2;
+        const sourceCenterY = y + sourceH / 2;
+        const posX = w / 2 - sourceCenterX * zoom;
+        const posY = h / 2 - sourceCenterY * zoom;
         button.style.backgroundSize = scaledW + "px " + scaledH + "px";
         button.style.backgroundPosition = posX + "px " + posY + "px";
       });
@@ -685,6 +669,9 @@
         // sea circular o una flecha. El relieve siempre sigue la figura real.
         const shape = getShape(currentSlide, link);
         if (shape) button.classList.add(shape);
+        if (currentSlide === 2 && ["Menús y bebidas","Carta","Normas","FAQ"].includes(link.name)) {
+          button.classList.add("page2-menu-button");
+        }
         if (shape !== "arrow-left" && shape !== "arrow-right" && shape !== "curved-arrow") {
           button.classList.add("lens-button");
         }
@@ -703,16 +690,22 @@
         button.setAttribute("aria-label", "Ir a página " + link.target);
 
         if (shape !== "arrow-left" && shape !== "arrow-right") {
-          button.style.left = link.x + "%";
-          button.style.top = link.y + "%";
-          button.style.width = link.w + "%";
-        }
-        if (shape !== "arrow-left" && shape !== "arrow-right") {
-          if (link.shape === "circle") {
-            button.style.height = "auto";
-            button.style.aspectRatio = "1 / 1";
+          if (currentSlide === 2 && ["Menús y bebidas","Carta","Normas","FAQ"].includes(link.name)) {
+            // Los cuatro botones del menú tienen exactamente el mismo tamaño.
+            button.style.left = link.x + "%";
+            button.style.top = link.y + "%";
+            button.style.width = "23.2%";
+            button.style.height = "13.5%";
           } else {
-            button.style.height = link.h + "%";
+            button.style.left = link.x + "%";
+            button.style.top = link.y + "%";
+            button.style.width = link.w + "%";
+            if (link.shape === "circle") {
+              button.style.height = "auto";
+              button.style.aspectRatio = "1 / 1";
+            } else {
+              button.style.height = link.h + "%";
+            }
           }
         }
 
@@ -721,7 +714,7 @@
         button.dataset.x = link.x;
         button.dataset.y = link.y;
         button.dataset.w = link.w;
-        button.dataset.h = link.shape === "circle" ? link.w : link.h;
+        button.dataset.h = (currentSlide === 2 && ["Menús y bebidas","Carta","Normas","FAQ"].includes(link.name)) ? 13.5 : (link.shape === "circle" ? link.w : link.h);
         button.style.backgroundImage = 'url("slides/' + currentSlide + '.png")';
 
         button.addEventListener("click", function(event) {
@@ -750,6 +743,8 @@
         button.style.height = link.h + "%";
         button.dataset.x = link.x;
         button.dataset.y = link.y;
+        button.dataset.w = link.w;
+        button.dataset.h = link.h;
         button.style.backgroundImage = 'url("slides/' + currentSlide + '.png")';
         button.style.backgroundRepeat = "no-repeat";
 
@@ -762,9 +757,8 @@
         stage.appendChild(button);
       });
 
-      // Recalcular la imagen de todos los botones después de crear también
-      // el botón de MAPS. Así el recorte de la diapositiva queda centrado
-      // dentro del botón y el efecto lupa enfoca el elemento correcto.
+      // MAPS se crea después de la primera sincronización; repetirla aquí
+      // para que la imagen de fondo del botón quede correctamente enfocada.
       syncButtonImages();
     }
 
