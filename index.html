@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>Mr. Wok — Carta</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+    }
+    body {
+      touch-action: manipulation;
+      font-family: Arial, sans-serif;
+    }
+    #viewer {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #stage {
+      position: relative;
+      width: min(100vw, 177.7777778vh);
+      height: min(56.25vw, 100vh);
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #000;
+    }
+    #slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: fill;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+    .hotspot {
+      position: absolute;
+      z-index: 10;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      display: block;
+    }
+    #fullscreen {
+      position: fixed;
+      right: 10px;
+      top: max(10px, env(safe-area-inset-top));
+      z-index: 50;
+      width: 44px;
+      height: 44px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 22px;
+    }
+    #home {
+      position: fixed;
+      left: 10px;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 50;
+      border: 0;
+      border-radius: 22px;
+      padding: 9px 15px;
+      background: rgba(0,0,0,.55);
+      color: #fff;
+      font-size: 13px;
+    }
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      color: #fff;
+    }
+  
+    /* ===== CARTA 2.3 — visual effects only, navigation untouched ===== */
+    .hotspot{
+      -webkit-tap-highlight-color:transparent;
+      outline:none;
+      transition:transform .14s ease, filter .14s ease;
+    }
+
+    /* Visual feedback is behind the transparent hit area and never receives
+       pointer events. It does not change coordinates or navigation. */
+    .hotspot::before{
+      content:"";
+      position:absolute;
+      inset:3%;
+      border-radius:10px;
+      pointer-events:none;
+      opacity:0;
+      border:1px solid rgba(255,255,255,.20);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.16),
+        inset 0 -3px 5px rgba(0,0,0,.15),
+        0 3px 8px rgba(0,0,0,.12);
+      transition:opacity .14s ease;
+    }
+
+    .hotspot:hover::before,
+    .hotspot:focus-visible::before{
+      opacity:.65;
+    }
+
+    .hotspot:active,
+    .hotspot.is-touching{
+      transform:scale(.975);
+      filter:brightness(.97);
+    }
+
+    .hotspot:active::before{
+      opacity:.85;
+      box-shadow:
+        inset 0 3px 6px rgba(0,0,0,.22),
+        inset 0 -1px 0 rgba(255,255,255,.08);
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .hotspot{transition:none!important}
+      .hotspot::before{transition:none!important}
+    }
+
+
+    /* ===== CARTA 3.0 — BOTONES CON RELIEVE 3D ===== */
+    .hotspot{
+      -webkit-tap-highlight-color:transparent;
+      outline:none;
+      border:0;
+      padding:0;
+      margin:0;
+      background:transparent;
+      box-shadow:none;
+      transition:transform .12s ease, filter .12s ease;
+      isolation:isolate;
+    }
+
+    /* Relieve 3D permanente: respeta la silueta del botón y deja ver
+       completamente la imagen original que hay debajo. */
+    .hotspot::before{
+      content:"";
+      position:absolute;
+      inset:2%;
+      pointer-events:none;
+      opacity:.58;
+      border:1px solid rgba(255,255,255,.30);
+      border-radius:12px;
+      background:linear-gradient(135deg,
+        rgba(255,255,255,.13) 0%,
+        rgba(255,255,255,.035) 28%,
+        rgba(0,0,0,.015) 52%,
+        rgba(0,0,0,.20) 100%);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.24),
+        inset 2px 0 0 rgba(255,255,255,.10),
+        inset 0 -4px 6px rgba(0,0,0,.24),
+        inset -2px 0 4px rgba(0,0,0,.13),
+        0 3px 7px rgba(0,0,0,.22);
+      transition:opacity .12s ease, box-shadow .12s ease;
+    }
+
+    /* Círculos: el bisel sigue exactamente la forma circular. */
+    .hotspot.circle::before{
+      border-radius:50%;
+    }
+
+    /* Flecha izquierda. */
+    .hotspot.arrow-left::before{
+      border:0;
+      border-radius:0;
+      background:linear-gradient(135deg,
+        rgba(255,255,255,.14),
+        rgba(255,255,255,.025) 42%,
+        rgba(0,0,0,.20));
+      clip-path:polygon(0 50%, 34% 5%, 34% 30%, 100% 30%, 100% 70%, 34% 70%, 34% 95%);
+      box-shadow:
+        inset 0 3px 0 rgba(255,255,255,.25),
+        inset 0 -5px 7px rgba(0,0,0,.25),
+        0 4px 8px rgba(0,0,0,.22);
+    }
+
+    /* Flecha derecha. */
+    .hotspot.arrow-right::before{
+      border:0;
+      border-radius:0;
+      background:linear-gradient(135deg,
+        rgba(255,255,255,.14),
+        rgba(255,255,255,.025) 42%,
+        rgba(0,0,0,.20));
+      clip-path:polygon(0 30%, 66% 30%, 66% 5%, 100% 50%, 66% 95%, 66% 70%, 0 70%);
+      box-shadow:
+        inset 0 3px 0 rgba(255,255,255,.25),
+        inset 0 -5px 7px rgba(0,0,0,.25),
+        0 4px 8px rgba(0,0,0,.22);
+    }
+
+    /* Flecha amarilla curva de regreso. */
+    .hotspot.curved-arrow::before{
+      border:0;
+      border-radius:0;
+      background:linear-gradient(135deg,
+        rgba(255,255,255,.16),
+        rgba(255,255,255,.025) 42%,
+        rgba(0,0,0,.20));
+      clip-path:polygon(18% 18%, 55% 5%, 72% 14%, 55% 26%, 51% 25%, 51% 52%, 46% 68%, 35% 80%, 21% 76%, 31% 61%, 34% 48%, 34% 28%, 18% 18%);
+      box-shadow:
+        inset 0 3px 0 rgba(255,255,255,.25),
+        inset 0 -5px 7px rgba(0,0,0,.25),
+        0 4px 8px rgba(0,0,0,.22);
+    }
+
+    /* Al pulsar, el botón se hunde y el bisel cambia de dirección. */
+    .hotspot:active,
+    .hotspot.is-touching{
+      transform:translateY(2px) scale(.985);
+      filter:brightness(.96);
+    }
+
+    .hotspot:active::before,
+    .hotspot.is-touching::before{
+      opacity:.82;
+      box-shadow:
+        inset 0 4px 7px rgba(0,0,0,.28),
+        inset 0 -1px 0 rgba(255,255,255,.12),
+        0 1px 3px rgba(0,0,0,.16);
+    }
+
+    .hotspot:hover::before,
+    .hotspot:focus-visible::before{
+      opacity:.72;
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .hotspot{transition:none!important;}
+      .hotspot::before{transition:none!important;}
+    }
+
+</style>
+</head>
+<body>
+  <div id="loading">Cargando carta…</div>
+
+  <div id="viewer">
+    <div id="stage">
+      <img id="slide" src="slides/1.png" alt="Carta Mr. Wok">
+    </div>
+
+    <button id="fullscreen" type="button" aria-label="Pantalla completa">⛶</button>
+    <button id="home" type="button">Inicio</button>
+  </div>
+
+  <script>
+    // Zonas de navegación obtenidas directamente de los enlaces internos
+    // del PowerPoint original. Los grupos se tratan como botones completos.
+    const DATA = {
+  "count": 14,
+  "links": {
+    "1": [
+      {
+        "x": 44.4,
+        "y": 7.2,
+        "w": 41.2,
+        "h": 41.2,
+        "shape": "circle",
+        "target": 2,
+        "name": "Ver carta"
+      }
+    ],
+    "2": [
+      {
+        "x": 25.8,
+        "y": 35.0,
+        "w": 23.2,
+        "h": 12.8,
+        "target": 5,
+        "name": "Menús y bebidas"
+      },
+      {
+        "x": 50.2,
+        "y": 35.0,
+        "w": 23.0,
+        "h": 12.8,
+        "target": 8,
+        "name": "Carta"
+      },
+      {
+        "x": 25.8,
+        "y": 51.0,
+        "w": 23.2,
+        "h": 12.8,
+        "target": 3,
+        "name": "Normas"
+      },
+      {
+        "x": 50.2,
+        "y": 51.0,
+        "w": 22.0,
+        "h": 12.8,
+        "target": 4,
+        "name": "FAQ"
+      },
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 1,
+        "name": "Inicio"
+      }
+    ],
+    "3": [
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 2,
+        "name": "Inicio"
+      }
+    ],
+    "4": [
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 2,
+        "name": "Inicio"
+      }
+    ],
+    "5": [
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 2,
+        "name": "Inicio"
+      },
+      {
+        "x": 80.3,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 6,
+        "name": "Siguiente"
+      },
+      {
+        "x": 8.2,
+        "y": 8.0,
+        "w": 7.2,
+        "h": 13.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "6": [
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 5,
+        "name": "Anterior"
+      },
+      {
+        "x": 80.3,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 7,
+        "name": "Siguiente"
+      },
+      {
+        "x": 8.2,
+        "y": 8.0,
+        "w": 7.2,
+        "h": 13.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "7": [
+      {
+        "x": 7.0,
+        "y": 39.0,
+        "w": 12.8,
+        "h": 22.0,
+        "target": 6,
+        "name": "Anterior"
+      },
+      {
+        "x": 8.2,
+        "y": 8.0,
+        "w": 7.2,
+        "h": 13.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "8": [
+      {
+        "x": 25.5,
+        "y": 31.0,
+        "w": 19.8,
+        "h": 34.0,
+        "target": 9,
+        "name": "Carta entresemana"
+      },
+      {
+        "x": 55.0,
+        "y": 31.0,
+        "w": 19.8,
+        "h": 34.0,
+        "target": 12,
+        "name": "Fin de semana y festivos"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "9": [
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 10,
+        "name": "Carne y verduras"
+      },
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 11,
+        "name": "Wok"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "10": [
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 9,
+        "name": "Marisco"
+      },
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 11,
+        "name": "Wok"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "11": [
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 9,
+        "name": "Marisco"
+      },
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 10,
+        "name": "Carne y verduras"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "12": [
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 13,
+        "name": "Carne y verduras"
+      },
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 14,
+        "name": "Salsas"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "13": [
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 14,
+        "name": "Salsas"
+      },
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 12,
+        "name": "Marisco"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ],
+    "14": [
+      {
+        "x": 4.0,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 12,
+        "name": "Marisco"
+      },
+      {
+        "x": 85.2,
+        "y": 7.0,
+        "w": 10.8,
+        "h": 19.0,
+        "target": 13,
+        "name": "Carne y verduras"
+      },
+      {
+        "x": 17.7,
+        "y": 7.0,
+        "w": 7.5,
+        "h": 12.5,
+        "target": 2,
+        "name": "Inicio menú"
+      }
+    ]
+  }
+};
+
+
+    DATA.external = {
+      "1": [
+        {
+          "x": 54.0,
+          "y": 86.5,
+          "w": 25.5,
+          "h": 8.0,
+          "url": "https://maps.app.goo.gl/sn9JC4gLSb1Sx7TDA",
+          "name": "Google Maps"
+        }
+      ]
+    };
+
+
+    const stage = document.getElementById("stage");
+    const slide = document.getElementById("slide");
+    const loading = document.getElementById("loading");
+
+    let currentSlide = 1;
+
+    function readSlide() {
+      const value = Number.parseInt(window.location.hash.substring(1), 10);
+      if (Number.isInteger(value) && value >= 1 && value <= DATA.count) {
+        return value;
+      }
+      return 1;
+    }
+
+    function goTo(number) {
+      const target = Math.max(1, Math.min(DATA.count, number));
+      currentSlide = target;
+      window.history.replaceState(null, "", "#" + target);
+      draw();
+    }
+
+    function getShape(slideNumber, link) {
+      const name = link.name || "";
+
+      // Portada: el botón VER CARTA es circular.
+      if (slideNumber === 1 && name === "Ver carta") return "circle";
+
+      // Menú de cartas: los dos botones centrales son circulares.
+      if (slideNumber === 8 && (name === "Carta entresemana" || name === "Fin de semana y festivos")) {
+        return "circle";
+      }
+
+      // Botones circulares de navegación de las páginas de carta.
+      if (slideNumber >= 9 && slideNumber <= 14 &&
+          ["Carne y verduras", "Wok", "Marisco", "Salsas"].includes(name)) {
+        return "circle";
+      }
+
+      // Flecha amarilla curva de regreso al menú.
+      if (name === "Inicio menú") return "curved-arrow";
+
+      // Flechas rojas laterales.
+      if (slideNumber >= 2 && slideNumber <= 4 && name === "Inicio") return "arrow-left";
+      if (slideNumber >= 5 && slideNumber <= 7 && (name === "Inicio" || name === "Anterior")) return "arrow-left";
+      if (slideNumber >= 5 && slideNumber <= 6 && name === "Siguiente") return "arrow-right";
+
+      return "rect";
+    }
+
+    function draw() {
+      currentSlide = readSlide();
+
+      document.querySelectorAll(".hotspot").forEach((element) => element.remove());
+
+      slide.src = "slides/" + currentSlide + ".png";
+
+      const links = DATA.links[String(currentSlide)] || [];
+
+      links.forEach((link) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "hotspot";
+
+        // La zona de toque puede ser rectangular aunque la figura del fondo
+        // sea circular o una flecha. El relieve siempre sigue la figura real.
+        const shape = getShape(currentSlide, link);
+        if (shape) button.classList.add(shape);
+
+        button.setAttribute("aria-label", "Ir a página " + link.target);
+
+        button.style.left = link.x + "%";
+        button.style.top = link.y + "%";
+        button.style.width = link.w + "%";
+        if (link.shape === "circle") {
+          button.style.height = "auto";
+          button.style.aspectRatio = "1 / 1";
+        } else {
+          button.style.height = link.h + "%";
+        }
+
+        button.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          goTo(link.target);
+        });
+
+        stage.appendChild(button);
+      });
+
+      const externalLinks = DATA.external[String(currentSlide)] || [];
+
+      externalLinks.forEach((link) => {
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.className = "hotspot";
+        button.setAttribute("aria-label", link.name || "Abrir enlace");
+
+        button.style.left = link.x + "%";
+        button.style.top = link.y + "%";
+        button.style.width = link.w + "%";
+        button.style.height = link.h + "%";
+
+        button.addEventListener("click", function(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          window.location.href = link.url;
+        });
+
+        stage.appendChild(button);
+      });
+    }
+
+    slide.addEventListener("load", function() {
+      loading.style.display = "none";
+    });
+
+    window.addEventListener("hashchange", draw);
+
+    document.getElementById("home").addEventListener("click", function() {
+      goTo(1);
+    });
+
+    document.getElementById("fullscreen").addEventListener("click", async function() {
+      try {
+        if (!document.fullscreenElement) {
+          await document.documentElement.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch (error) {
+        // Algunos móviles no permiten fullscreen desde el navegador.
+      }
+    });
+
+    // Deslizar también permite cambiar de página.
+    let startX = 0;
+    let startY = 0;
+
+    stage.addEventListener("touchstart", function(event) {
+      const touch = event.changedTouches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+    }, { passive: true });
+
+    stage.addEventListener("touchend", function(event) {
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)) {
+        goTo(currentSlide + (dx < 0 ? 1 : -1));
+      }
+    }, { passive: true });
+
+    currentSlide = readSlide();
+    draw();
+  
+    document.addEventListener("touchstart", function(event){
+      const target = event.target.closest(".hotspot, #home, #fs");
+      if (target) target.classList.add("is-touching");
+    }, {passive:true});
+
+    document.addEventListener("touchend", function(){
+      document.querySelectorAll(".is-touching").forEach(function(el){
+        el.classList.remove("is-touching");
+      });
+    }, {passive:true});
+
+    document.addEventListener("touchcancel", function(){
+      document.querySelectorAll(".is-touching").forEach(function(el){
+        el.classList.remove("is-touching");
+      });
+    }, {passive:true});
+
+</script>
+</body>
+</html>
