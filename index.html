@@ -226,6 +226,32 @@
         0 4px 8px rgba(0,0,0,.22);
     }
 
+    /* ===== FASE 3 — LA IMAGEN ORIGINAL FORMA PARTE DEL BOTÓN =====
+       El botón muestra su propio recorte de la diapositiva. Así el relieve
+       se aplica a la imagen del botón y no a una capa transparente encima. */
+    .hotspot{
+      overflow:hidden;
+      background-repeat:no-repeat;
+      background-color:transparent;
+      background-origin:border-box;
+    }
+
+    .hotspot.circle{
+      clip-path:circle(50% at 50% 50%);
+    }
+
+    .hotspot.arrow-left{
+      clip-path:polygon(0 50%, 34% 5%, 34% 30%, 100% 30%, 100% 70%, 34% 70%, 34% 95%);
+    }
+
+    .hotspot.arrow-right{
+      clip-path:polygon(0 30%, 66% 30%, 66% 5%, 100% 50%, 66% 95%, 66% 70%, 0 70%);
+    }
+
+    .hotspot.curved-arrow{
+      clip-path:polygon(18% 18%, 55% 5%, 72% 14%, 55% 26%, 51% 25%, 51% 52%, 46% 68%, 35% 80%, 21% 76%, 31% 61%, 34% 48%, 34% 28%, 18% 18%);
+    }
+
     /* Al pulsar, el botón se hunde y el bisel cambia de dirección. */
     .hotspot:active,
     .hotspot.is-touching{
@@ -664,6 +690,17 @@
       return "rect";
     }
 
+    function syncButtonImages() {
+      const sw = stage.clientWidth;
+      const sh = stage.clientHeight;
+      document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
+        const x = parseFloat(button.dataset.x) / 100 * sw;
+        const y = parseFloat(button.dataset.y) / 100 * sh;
+        button.style.backgroundSize = sw + "px " + sh + "px";
+        button.style.backgroundPosition = (-x) + "px " + (-y) + "px";
+      });
+    }
+
     function draw() {
       currentSlide = readSlide();
 
@@ -696,6 +733,14 @@
           button.style.height = link.h + "%";
         }
 
+        // La propia imagen de la diapositiva se usa como fondo del botón,
+        // recortada exactamente a la zona del botón.
+        button.dataset.x = link.x;
+        button.dataset.y = link.y;
+        button.dataset.w = link.w;
+        button.dataset.h = link.shape === "circle" ? link.w : link.h;
+        button.style.backgroundImage = 'url("slides/' + currentSlide + '.png")';
+
         button.addEventListener("click", function(event) {
           event.preventDefault();
           event.stopPropagation();
@@ -704,6 +749,8 @@
 
         stage.appendChild(button);
       });
+
+      syncButtonImages();
 
       const externalLinks = DATA.external[String(currentSlide)] || [];
 
@@ -734,6 +781,7 @@
     });
 
     window.addEventListener("hashchange", draw);
+    window.addEventListener("resize", syncButtonImages);
 
     document.getElementById("home").addEventListener("click", function() {
       goTo(1);
