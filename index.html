@@ -616,7 +616,7 @@
     function syncButtonImages() {
       const sw = stage.clientWidth;
       const sh = stage.clientHeight;
-      const zoom = (currentSlide === 1 ? 1.12 : 1.18);
+      const zoom = 1.18;
       document.querySelectorAll(".hotspot[data-x]").forEach((button) => {
         if (button.classList.contains("arrow-left") || button.classList.contains("arrow-right") || button.classList.contains("curved-arrow")) return;
         const x = parseFloat(button.dataset.x) / 100 * sw;
@@ -634,12 +634,17 @@
       document.querySelectorAll(".map-button[data-x]").forEach((button) => {
         const x = parseFloat(button.dataset.x) / 100 * sw;
         const y = parseFloat(button.dataset.y) / 100 * sh;
+        const sourceW = parseFloat(button.dataset.w) / 100 * sw;
+        const sourceH = parseFloat(button.dataset.h) / 100 * sh;
         const w = button.offsetWidth;
         const h = button.offsetHeight;
         const scaledW = sw * zoom;
         const scaledH = sh * zoom;
-        const posX = -((x + w / 2) * zoom - w / 2);
-        const posY = -((y + h / 2) * zoom - h / 2);
+        // Centra exactamente el mismo punto de la diapositiva dentro del botón.
+        const sourceCenterX = x + sourceW / 2;
+        const sourceCenterY = y + sourceH / 2;
+        const posX = w / 2 - sourceCenterX * zoom;
+        const posY = h / 2 - sourceCenterY * zoom;
         button.style.backgroundSize = scaledW + "px " + scaledH + "px";
         button.style.backgroundPosition = posX + "px " + posY + "px";
       });
@@ -729,6 +734,8 @@
         button.style.height = link.h + "%";
         button.dataset.x = link.x;
         button.dataset.y = link.y;
+        button.dataset.w = link.w;
+        button.dataset.h = link.h;
         button.style.backgroundImage = 'url("slides/' + currentSlide + '.png")';
         button.style.backgroundRepeat = "no-repeat";
 
