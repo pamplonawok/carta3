@@ -143,30 +143,34 @@
     .hotspot{ -webkit-tap-highlight-color:transparent; outline:none; border:0; padding:0; margin:0; background-repeat:no-repeat; background-color:transparent; background-origin:border-box; box-shadow:none; transition:transform .12s ease,filter .12s ease; isolation:isolate; cursor:pointer; }
     .hotspot::before{ content:""; position:absolute; inset:0; pointer-events:none; border:1px solid rgba(255,255,255,.34); border-radius:inherit; background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(255,255,255,.04) 28%,rgba(0,0,0,0) 52%,rgba(0,0,0,.24)); box-shadow:inset 0 2px 0 rgba(255,255,255,.24),inset 2px 0 0 rgba(255,255,255,.08),inset 0 -5px 7px rgba(0,0,0,.28),inset -2px 0 4px rgba(0,0,0,.15),0 3px 7px rgba(0,0,0,.28); }
     .hotspot.circle{clip-path:circle(50% at 50% 50%);border-radius:50%;}.hotspot.circle::before{border-radius:50%;}
-    /* Flechas rojas: misma silueta visual que las flechas del PowerPoint.
-       Son un poco mayores que el dibujo original para taparlo por completo. */
+    /* Flechas 3.1: botón cuadrado negro con flecha roja */
     .hotspot.arrow-left,.hotspot.arrow-right{
-      overflow:visible;
-      background:linear-gradient(180deg,#ff3a3a 0%,#f20d0d 48%,#c40000 100%)!important;
-      border:0;
-      border-radius:0;
-      box-shadow:0 4px 0 rgba(70,0,0,.85),0 7px 10px rgba(0,0,0,.42),inset 0 2px 0 rgba(255,255,255,.24),inset 0 -4px 6px rgba(90,0,0,.25);
-      width:11.8%!important;
-      height:10.8%!important;
-      top:44.1%!important;
-      z-index:20;
-      clip-path:polygon(0 50%,34% 15%,34% 36%,100% 36%,100% 64%,34% 64%,34% 85%);
-    }
-    .hotspot.arrow-right{
-      clip-path:polygon(0 36%,66% 36%,66% 15%,100% 50%,66% 85%,66% 64%,0 64%);
+      overflow:hidden!important;
+      background:#050505!important;
+      background-image:none!important;
+      border:1px solid rgba(255,35,35,.75)!important;
+      border-radius:10px!important;
+      box-shadow:0 4px 0 #320000,0 7px 12px rgba(0,0,0,.55),inset 0 2px 0 rgba(255,255,255,.10),inset 0 -4px 7px rgba(0,0,0,.45)!important;
+      width:10.8%!important;
+      height:auto!important;
+      aspect-ratio:1 / 1!important;
+      top:43.3%!important;
+      z-index:30;
     }
     .hotspot.arrow-left::before,.hotspot.arrow-right::before{
-      content:"";position:absolute;inset:0;border:0;
-      background:linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,.04) 32%,rgba(0,0,0,0) 55%,rgba(0,0,0,.25));
-      box-shadow:inset 0 2px 0 rgba(255,255,255,.22),inset 0 -4px 6px rgba(0,0,0,.25);
-      clip-path:inherit;pointer-events:none;
+      content:"";position:absolute;inset:0;pointer-events:none;border:0!important;border-radius:inherit!important;
+      background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,0) 35%,rgba(0,0,0,.18) 75%,rgba(0,0,0,.35));
+      box-shadow:inset 0 2px 0 rgba(255,255,255,.10),inset 0 -4px 6px rgba(0,0,0,.28)!important;
     }
-    .hotspot.arrow-left::after,.hotspot.arrow-right::after{content:none;}
+    .hotspot.arrow-left::after,.hotspot.arrow-right::after{
+      content:"";position:absolute;left:23%;top:30%;width:54%;height:40%;
+      background:#e31515;
+      filter:drop-shadow(0 2px 0 #720000) drop-shadow(0 3px 3px rgba(0,0,0,.35));
+      clip-path:polygon(0 35%,55% 35%,55% 0,100% 50%,55% 100%,55% 65%,0 65%);
+      pointer-events:none;
+    }
+    .hotspot.arrow-left::after{transform:scaleX(-1);}
+    .hotspot.arrow-right::after{transform:none;}
     .hotspot.curved-arrow{display:flex;align-items:center;justify-content:center;overflow:visible;background-image:none!important;background:linear-gradient(180deg,#f1cb2e,#cda50a 58%,#8b6b00)!important;border:2px solid #ffe36a;border-radius:14px;color:#171200;font-family:Arial,sans-serif;font-weight:900;font-size:clamp(27px,3.8vw,45px);line-height:1;box-shadow:0 4px 0 #5a4500,0 7px 12px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -4px 6px rgba(0,0,0,.22);}
     .hotspot.curved-arrow::before{content:none;}.hotspot.curved-arrow::after{content:'↶';}
     .hotspot.map-button{overflow:hidden;border-radius:11px;box-shadow:0 3px 0 rgba(65,0,0,.95),0 5px 10px rgba(0,0,0,.35);}.hotspot.map-button::before{border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.14),rgba(255,255,255,.025) 35%,rgba(0,0,0,0) 54%,rgba(0,0,0,.18));}
@@ -618,24 +622,28 @@
         // Las flechas rojas son algo mayores que la zona original para ocultar
         // completamente el dibujo rojo que existe en el fondo.
         if (shape === "arrow-left" || shape === "arrow-right") {
-          // Posiciones independientes de la caja antigua del PowerPoint.
-          // Izquierda = flecha hacia la izquierda; derecha = flecha hacia la derecha.
-          button.style.left = shape === "arrow-left" ? "6.8%" : "81.4%";
-          button.style.top = "44.1%";
-          button.style.width = "11.8%";
-          button.style.height = "10.8%";
+          // Caja cuadrada negra que tapa completamente la flecha roja del fondo.
+          button.style.left = shape === "arrow-left" ? "6.9%" : "82.0%";
+          button.style.top = "43.3%";
+          button.style.width = "10.8%";
+          button.style.height = "auto";
+          button.style.aspectRatio = "1 / 1";
         }
 
         button.setAttribute("aria-label", "Ir a página " + link.target);
 
-        button.style.left = link.x + "%";
-        button.style.top = link.y + "%";
-        button.style.width = link.w + "%";
-        if (link.shape === "circle") {
-          button.style.height = "auto";
-          button.style.aspectRatio = "1 / 1";
-        } else {
-          button.style.height = link.h + "%";
+        if (shape !== "arrow-left" && shape !== "arrow-right") {
+          button.style.left = link.x + "%";
+          button.style.top = link.y + "%";
+          button.style.width = link.w + "%";
+        }
+        if (shape !== "arrow-left" && shape !== "arrow-right") {
+          if (link.shape === "circle") {
+            button.style.height = "auto";
+            button.style.aspectRatio = "1 / 1";
+          } else {
+            button.style.height = link.h + "%";
+          }
         }
 
         // La propia imagen de la diapositiva se usa como fondo del botón,
